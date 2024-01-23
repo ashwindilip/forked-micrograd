@@ -74,7 +74,7 @@ class Value:
 
         return out
 
-     def exp(self):
+    def exp(self):
         x = self.data
         out = Value(math.exp(x), (self, ), 'exp')
 

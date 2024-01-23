@@ -65,3 +65,24 @@ def test_more_ops():
     # backward pass went well
     assert abs(amg.grad - apt.grad.item()) < tol
     assert abs(bmg.grad - bpt.grad.item()) < tol
+
+def test_unary_tensor_fns():
+    def test_unary_tensor_fn(value_fn, tensor_fn, xs, tol=1e-6):
+        for x in xs:
+            xv = Value(x)
+            yv = value_fn(xv)
+            yv.backward()
+
+            xt = torch.Tensor([x]).double()
+            xt.requires_grad = True
+            yt = tensor_fn(xt)
+            yt.backward()
+
+            # this is for the forward pass
+            assert abs(yv.data - yt.data.item()) < tol
+            # this is for the backward pass
+            assert abs(xv.grad - xt.grad.item()) < tol
+
+    test_unary_tensor_fn(Value.tanh, torch.Tensor.tanh, [-1., .123, 2.])
+    test_unary_tensor_fn(Value.exp, torch.Tensor.exp, [-1., .123, 2.])
+    test_unary_tensor_fn(Value.exp, torch.Tensor.exp, [-1., .123, 2.])
